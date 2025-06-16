@@ -188,6 +188,15 @@ glow --help
 Check out the [Glamour Style Section](https://github.com/charmbracelet/glamour/blob/master/styles/gallery/README.md)
 to find more styles. Or [make your own](https://github.com/charmbracelet/glamour/tree/master/styles)!
 
+### Markdown Extensions
+
+By default, Glow recognizes files with the following extensions as markdown:
+`.md`, `.mdown`, `.mkdn`, `.mkd`, `.markdown`, 
+
+You can use the `--force` (or `-f`) flag to render any file as markdown, regardless of its extension.
+
+When processing files with mixed content, Glow will render any valid markdown syntax (headers, bold, italic, lists, etc.) while displaying non-markdown content as plain text.
+
 ## The Config File
 
 If you find yourself supplying the same flags to `glow` all the time, it's
@@ -213,6 +222,8 @@ all: false
 showLineNumbers: false
 # preserve newlines in the output
 preserveNewLines: false
+# markdown file extensions recognized
+markdownExtensions: [".md", ".mdown", ".mkdn", ".mkd", ".markdown"]
 ```
 
 ## Contributing

@@ -32,16 +32,18 @@ var (
 	// CommitSHA as provided by goreleaser.
 	CommitSHA = ""
 
-	readmeNames      = []string{"README.md", "README", "Readme.md", "Readme", "readme.md", "readme"}
-	configFile       string
-	pager            bool
-	tui              bool
-	style            string
-	width            uint
-	showAllFiles     bool
-	showLineNumbers  bool
-	preserveNewLines bool
-	mouse            bool
+	readmeNames        = []string{"README.md", "README", "Readme.md", "Readme", "readme.md", "readme"}
+	configFile         string
+	pager              bool
+	tui                bool
+	style              string
+	width              uint
+	showAllFiles       bool
+	showLineNumbers    bool
+	preserveNewLines   bool
+	mouse              bool
+	force              bool
+	markdownExtensions []string
 
 	rootCmd = &cobra.Command{
 		Use:   "glow [SOURCE|DIR]",
@@ -171,6 +173,10 @@ func validateOptions(cmd *cobra.Command) error {
 	showAllFiles = viper.GetBool("all")
 	preserveNewLines = viper.GetBool("preserveNewLines")
 	showLineNumbers = viper.GetBool("showLineNumbers")
+	force = viper.GetBool("force")
+
+	// Use default extensions from viper config
+	markdownExtensions = viper.GetStringSlice("markdownExtensions")
 
 	if pager && tui {
 		return errors.New("cannot use both pager and tui")
@@ -286,7 +292,7 @@ func executeCLI(cmd *cobra.Command, src *source, w io.Writer) error {
 		baseURL = u.String() + "/"
 	}
 
-	isCode := !utils.IsMarkdownFile(src.URL)
+	isCode := !force && !utils.IsMarkdownFile(src.URL, markdownExtensions)
 
 	// initialize glamour
 	r, err := glamour.NewTermRenderer(
@@ -359,6 +365,8 @@ func runTUI(path string, content string) error {
 	cfg.GlamourMaxWidth = width
 	cfg.EnableMouse = mouse
 	cfg.PreserveNewLines = preserveNewLines
+	cfg.MarkdownExtensions = markdownExtensions
+	cfg.Force = force
 
 	// Run Bubble Tea program
 	if _, err := ui.NewProgram(cfg, content).Run(); err != nil {
@@ -403,6 +411,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&showLineNumbers, "line-numbers", "l", false, "show line numbers (TUI-mode only)")
 	rootCmd.Flags().BoolVarP(&preserveNewLines, "preserve-new-lines", "n", false, "preserve newlines in the output")
 	rootCmd.Flags().BoolVarP(&mouse, "mouse", "m", false, "enable mouse wheel (TUI-mode only)")
+	rootCmd.Flags().BoolVarP(&force, "force", "f", false, "force markdown rendering for any file")
 	_ = rootCmd.Flags().MarkHidden("mouse")
 
 	// Config bindings
@@ -415,10 +424,12 @@ func init() {
 	_ = viper.BindPFlag("preserveNewLines", rootCmd.Flags().Lookup("preserve-new-lines"))
 	_ = viper.BindPFlag("showLineNumbers", rootCmd.Flags().Lookup("line-numbers"))
 	_ = viper.BindPFlag("all", rootCmd.Flags().Lookup("all"))
+	_ = viper.BindPFlag("force", rootCmd.Flags().Lookup("force"))
 
 	viper.SetDefault("style", styles.AutoStyle)
 	viper.SetDefault("width", 0)
 	viper.SetDefault("all", true)
+	viper.SetDefault("markdownExtensions", []string{".md", ".mdown", ".mkdn", ".mkd", ".markdown"})
 
 	rootCmd.AddCommand(configCmd, manCmd)
 }

@@ -23,10 +23,6 @@ const (
 
 var (
 	config Config
-
-	markdownExtensions = []string{
-		"*.md", "*.mdown", "*.mkdn", "*.mkd", "*.markdown",
-	}
 )
 
 // NewProgram returns a new Tea program.
@@ -380,12 +376,22 @@ func findLocalFiles(m commonModel) tea.Cmd {
 
 		log.Debug("local directory is", "cwd", cwd)
 
+		// Convert extensions from config format (.md) to glob format (*.md) for gitcha
+		globExtensions := make([]string, len(m.cfg.MarkdownExtensions))
+		for i, ext := range m.cfg.MarkdownExtensions {
+			if strings.HasPrefix(ext, ".") {
+				globExtensions[i] = "*" + ext
+			} else {
+				globExtensions[i] = "*." + ext
+			}
+		}
+
 		// Switch between FindFiles and FindAllFiles to bypass .gitignore rules
 		var ch chan gitcha.SearchResult
 		if m.cfg.ShowAllFiles {
-			ch, err = gitcha.FindAllFilesExcept(cwd, markdownExtensions, nil)
+			ch, err = gitcha.FindAllFilesExcept(cwd, globExtensions, nil)
 		} else {
-			ch, err = gitcha.FindFilesExcept(cwd, markdownExtensions, ignorePatterns(m))
+			ch, err = gitcha.FindFilesExcept(cwd, globExtensions, ignorePatterns(m))
 		}
 
 		if err != nil {

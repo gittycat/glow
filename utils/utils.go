@@ -45,12 +45,8 @@ func WrapCodeBlock(s, language string) string {
 	return "```" + language + "\n" + s + "```"
 }
 
-var markdownExtensions = []string{
-	".md", ".mdown", ".mkdn", ".mkd", ".markdown",
-}
-
 // IsMarkdownFile returns whether the filename has a markdown extension.
-func IsMarkdownFile(filename string) bool {
+func IsMarkdownFile(filename string, extensions []string) bool {
 	ext := filepath.Ext(filename)
 
 	if ext == "" {
@@ -58,7 +54,7 @@ func IsMarkdownFile(filename string) bool {
 		return true
 	}
 
-	for _, v := range markdownExtensions {
+	for _, v := range extensions {
 		if strings.EqualFold(ext, v) {
 			return true
 		}

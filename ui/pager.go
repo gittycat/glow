@@ -426,7 +426,7 @@ func glamourRender(m pagerModel, markdown string) (string, error) {
 		return markdown, nil
 	}
 
-	isCode := !utils.IsMarkdownFile(m.currentDocument.Note)
+	isCode := !config.Force && !utils.IsMarkdownFile(m.currentDocument.Note, config.MarkdownExtensions)
 	width := max(0, min(int(m.common.cfg.GlamourMaxWidth), m.viewport.Width)) //nolint:gosec
 	if isCode {
 		width = 0

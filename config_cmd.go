@@ -23,6 +23,8 @@ pager: false
 width: 80
 # show all files, including hidden and ignored.
 all: false
+# recognized markdown file extensions
+markdownExtensions: [".md", ".mdown", ".mkdn", ".mkd", ".markdown"]
 `
 
 var configCmd = &cobra.Command{
